@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-### FIX STRUCTURE IN THIS SCRIPT!!!!
 import os
 from dotenv import load_dotenv
 from rag import init_client_chroma, get_response, DIR, LEGAL_PROJ
@@ -14,7 +13,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_classic.chains.query_constructor.base import AttributeInfo
 from langchain_openai import ChatOpenAI
 
-#### GLOBAL == SO FAR.
+#### GLOBAL 
 # OPENAI API KEY
 load_dotenv()
 OPENAI_KEY = os.getenv('OPENAI_API_KEY')
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     rag_chain = create_retrieval_chain(retriever, chain_to_answer_query) # RunnableBinding
     
     # QUESTION (HARDCODED)
-    question = "¿Cuál fue la sentencia del caso que habla de acoso escolar?" ### FASTAPI!!!
+    question = "¿Cuál fue la sentencia del caso que habla de acoso escolar?"
     
     chat_answer = get_response(
         user_query=question,
