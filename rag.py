@@ -13,7 +13,6 @@ from chromadb import EmbeddingFunction, Documents, Embeddings
 
 # Langchain
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.runnables.base import RunnableBinding
 
@@ -92,8 +91,10 @@ def create_chunks(
             documents.append(chunk)
             metadata.append(
                 {
+                    "row_index" : idx,
                     "tema" : str(row['Tema - subtema']),
-                    "row_index" : idx
+                    "sentencia" : str(row['resuelve']),
+                    "resumen_decision" : str(row['sintesis'])
                 }
             )
             ids.append(f"doc_{idx}_chunk_{i}")

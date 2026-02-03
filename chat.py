@@ -18,6 +18,7 @@ from langchain_openai import ChatOpenAI
 # OPENAI API KEY
 load_dotenv()
 OPENAI_KEY = os.getenv('OPENAI_API_KEY')
+PROMPT_INSTRUCTION = "./prompt_instruction.txt"
 
 ## Client init
 chroma_client, _, openai_embedder = init_client_chroma(input_path=DIR, llm_key=OPENAI_KEY)
@@ -27,15 +28,37 @@ db = Chroma(client=chroma_client, collection_name=LEGAL_PROJ, embedding_function
 
 # Setting metadata.
 metadata_info = [
+    
+    AttributeInfo(
+        name="row_index",
+        description="El numero especifico de la fuente del documento de Excel, leido como un DataFrame en Pandas.",
+        type="integer"
+    ),
+    
     AttributeInfo(
         name="tema",
         description="\
             La sintesis sobre el tema de la(s) tutela(s) y proceso(s) legales llevados a cabo.",
         type="string"
-    )
+    ),
+
+    AttributeInfo(
+        name="sentencia",
+        description="\
+            Es la decision tomada por la corte constitucional sobre el caso legal (demanda, tutela, auto), y imparte si falla o no",
+        type="string"
+    ),
+    
+    AttributeInfo(
+        name="resumen_decision",
+        description="\
+            Se trata del resumen del fallo dado por la corte o juzgado acerca del caso.",
+        type="string"
+    ),
+    
 ]
 
-document_content_description = "Información sobre posibles demandas y sus resultados, relacionadas mayoritariamente con redes sociales."
+document_content_description = "Historial de demandas y sentencias legales relacionadas con redes sociales, acoso escolar y derechos educativos."
 
 if __name__ == "__main__":
     
@@ -55,12 +78,9 @@ if __name__ == "__main__":
         verbose=True
     )
     
-    prompt_for_system = (  ### FIX PROMPT!!!
-        "You are a specialized legal assistant. Use the following pieces of retrieved "
-        "context to answer the user's question accurately. "
-        "If you don't know the answer, say that you don't know. "
-        "Context: {context}"
-    )
+    ## --- IMPORT PROMPT ---
+    with open(PROMPT_INSTRUCTION, "r", encoding="utf-8") as prompt:
+        prompt_for_system = prompt.read()
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", prompt_for_system),
@@ -72,7 +92,7 @@ if __name__ == "__main__":
     rag_chain = create_retrieval_chain(retriever, chain_to_answer_query) # RunnableBinding
     
     # QUESTION (HARDCODED)
-    question = "Is there any case found of bullying in the school." ### FASTAPI!!!
+    question = "¿Cuál fue la sentencia del caso que habla de acoso escolar?" ### FASTAPI!!!
     
     chat_answer = get_response(
         user_query=question,
