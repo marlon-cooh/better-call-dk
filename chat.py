@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import pandas as pd
 from dotenv import load_dotenv
-from rag import init_client_chroma, get_response, DIR, LEGAL_PROJ
+from embeddings import init_client_chroma, get_response, DIR, LEGAL_PROJ
 
 # Retrieval.
 from langchain_chroma import Chroma
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     openai_llm_instance = ChatOpenAI(
         api_key=OPENAI_KEY,
         model="gpt-4o",
-        temperature=0
+        temperature=0.1
     )
 
     ## RESPONSE CONFIG
@@ -77,10 +78,10 @@ if __name__ == "__main__":
         verbose=True
     )
     
-    ## --- IMPORT PROMPT ---
+    ## --- IMPORT PROMPT CONFIG ---
     with open(PROMPT_INSTRUCTION, "r", encoding="utf-8") as prompt:
         prompt_for_system = prompt.read()
-    
+    ## --- BINDING PROMPT AND METADATA-RICH QUERY.
     prompt = ChatPromptTemplate.from_messages([
         ("system", prompt_for_system),
         ("human", "{input}"),
@@ -90,11 +91,25 @@ if __name__ == "__main__":
     # Retrieval
     rag_chain = create_retrieval_chain(retriever, chain_to_answer_query) # RunnableBinding
     
-    # QUESTION (HARDCODED)
-    question = "¿Cuál fue la sentencia del caso que habla de acoso escolar?"
+    # TEST QUESTIONS.
+    questions = [
+        "¿Cuál fue la sentencia del caso que habla de acoso escolar?",
+        "¿Cuáles son las sentencias de 3 demandas?",
+        "¿De qué se trataron las 3 demandas anteriores?",
+        "¿diga el detalle de la demanda relacionada con acoso escolar?",
+        "¿existen casos que hablan sobre el PIAR, indique de que trataron los casos y cuáles fueron sus sentencias?"
+    ]
     
-    chat_answer = get_response(
-        user_query=question,
-        chain=rag_chain
-    )
-    print(chat_answer["output"])
+    test_responses = {"Pregunta de prueba" : [], "Respuesta" : []}
+    for question in questions:
+        test_responses["Pregunta de prueba"].append(question)
+        response = get_response(
+            user_query=question,
+            chain=rag_chain
+        )
+        test_responses["Respuesta"].append(response["output"])
+    
+    test_responses_dt = pd.DataFrame.from_dict(test_responses)
+    test_responses_dt.to_csv("prueba_2.csv")
+    
+    print(test_responses_dt)

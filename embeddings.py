@@ -47,7 +47,6 @@ def cleaned_dataset_from_legal_info(raw_data:pd.DataFrame, cols_to_clean:list=["
     
     return data
 
-
 # Initialize client in ChromaDB
 def init_client_chroma(
         input_path:str, 
@@ -157,11 +156,8 @@ if __name__ == "__main__":
     
     ## Client init
     chroma_client, adapter_func, langchain_embeddings = init_client_chroma(input_path=DIR)
-    
     ## Chunking
     ids, documents, metadata = create_chunks(data=data)
-    
-
     ## Vector DB creation
     db = assemble_collection(
         ids=ids,
